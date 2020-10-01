@@ -9,6 +9,99 @@ const OUTPUT_DIR = path.resolve(__dirname, "output");
 const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./lib/htmlRenderer");
+// Start of Question
+const continueQuest = {
+    type: 'input',
+    name: 'continue',
+    message: "Do you wish to add an employee?",
+    choices: ['yes', 'no']
+}
+// Questions to ask for employee 
+const questionOptions = [
+    {
+        type: 'input',
+        name: 'name',
+        message: 'What is the employee\'s name?'
+    },
+    {
+        type: 'input',
+        name: 'id',
+        message: 'What is the employee\'s id?'
+    },
+    {
+        type: 'input',
+        name: 'email',
+        message: 'What is the employee\'s email?'
+    },
+    {
+        type: 'list',
+        name: 'role',
+        message: 'What is the employee\'s role?',
+        choices: ['Intern', 'Engineer', 'Manager']
+    },
+];
+//Questions to ask what place they have credit at
+const followUpQuest = [
+    {
+        type: 'input',
+        name: 'info',
+        message: 'What is the intern\'s school?'
+    },
+    {
+        type: 'input',
+        name: 'info',
+        message: 'What is the engineer\'s github?'
+    },
+    {
+        type: 'input',
+        name: 'info',
+        message: 'What is the manager\'s office number?'
+    }
+];
+const employees = [];
+writeOutput =() => {
+    if(!fs.existsSync(OUTPUT_DIR)) {
+        fs.mkdirSync(OUTPUT_DIR)
+    }
+    fs.writeFileSync(outputPath, render(employees), "utf-8")
+}
+
+    async function askQuestions() {
+        let continueAsking = true;
+        while(continueAsking){
+            let answers = await inquirer.prompt(questionOptions);
+            switch (answers.role) {
+                case 'Intern':
+                    {
+                        const followUp = await inquirer.prompt(followUpQuest[0]);
+                        var intern = new Intern (answers.name, answers.id, answers.email, answers.role, followUp.info);
+                        employees.push(intern);
+                    }
+                    break;
+                case 'Engineer': 
+                    {
+                        const followUp = await inquirer.prompt(followUpQuest[1]);
+                        var engineer = new Engineer (answers.name, answers.id, answers.email, answers.role, followUp.info);
+                        employees.push(engineer);
+                    }
+                    break;
+                case 'Manager':
+                    {
+                        const followUp = await inquirer.prompt(followUpQuest[2]);
+                        var manager = new Manager (answers.name, answers.id, answers.email, answers.role, followUp.info);
+                        employees.push(manager);
+                }
+                break;
+        }
+
+        let continueAnswer = await inquirer.prompt(continueQuest);
+        continueAsking = continueAnswer.continue.toLowerCase() === 'yes', 'no';
+    }
+
+    writeOutput();
+}
+
+askQuestions();
 
 
 // Write code to use inquirer to gather information about the development team members,
